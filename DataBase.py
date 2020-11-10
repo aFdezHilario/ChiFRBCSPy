@@ -28,16 +28,16 @@ class DataBase():
         An Array containing all fuzzy variables.
     """
     
+    """
+    Compute the ranges for each variable / column
+        
+    * X is the input training data
+    * labels are the number of labels
+        
+    Considers each variable to be either nominal (crisp) of numerical (triangular fuzzy set)
+    """
     def __init__(self, X, labels):
-    """
-        Compute the ranges for each variable / column
-        
-        * X is the input training data
-        * labels are the number of labels
-        
-        Considers each variable to be either nominal (crisp) of numerical (triangular fuzzy set)
-        
-    """
+    
         self.FuzzyLabels_ = list()
         self.labels = labels
         for column in X.T:
@@ -49,31 +49,32 @@ class DataBase():
                 fuzzyVar = FuzzyVariable(labels,minValue,maxValue)
             
             self.FuzzyLabels_.append(fuzzyVar)
+
+    """
+    Obtains the fuzzy labels with highest membership values for the given example
         
+    * example is the input example
+        
+    The antecedent is built as a string to be used as key in a hast table for the rules
+    """
     def getRuleFromExample(self,example):
-    """
-        Obtains the fuzzy labels with highest membership values for the given example
-        
-        * example is the input example
-        
-        The antecedent is built as a string to be used as key in a hast table for the rules
-    """
         labels = str()
         for fuzzyVar,inputValue in zip(self.FuzzyLabels_,example):
             labels = labels + str(fuzzyVar.getLabelIndex(inputValue))
         return labels
-                    
+
+    """
+    Computes the fuzzy membership degree according to the fuzzy variables
+        
+    * variable is the index of the variable
+    * label is the index of the fuzzy label 
+    * value is the value to be "fuzzyfied"
+        
+    In case of nominal variable, the output is {0,1} regarding equality
+    In case of fuzzy variable, the output is computed with the fuzzy membership function
+    """
     def computeMembershipDegree (self, variable, label, value):
-    """
-        Computes the fuzzy membership degree according to the fuzzy variables
-        
-        * variable is the index of the variable
-        * label is the index of the fuzzy label 
-        * value is the value to be "fuzzyfied"
-        
-        In case of nominal variable, the output is {0,1} regarding equality
-        In case of fuzzy variable, the output is computed with the fuzzy membership function
-    """
+    
         if (isinstance(self.FuzzyLabels_[variable],NominalVariable)):
             if self.FuzzyLabels_[variable] == value:
                 return 1
@@ -82,16 +83,16 @@ class DataBase():
         else:   
             return self.FuzzyLabels_[variable][label].getMembershipDegree(value)
     
-
+    """
+    Computes the matching degree of the example to the rule. 
+        
+    * rule is the fuzzy rule (antecedents with Fuzzy/Nominal variables)
+    * example is the tuple with the values to be "fuzzyfied"
+        
+    Product t-norm is used for the whole antecedent. No other t-norm is currently implemented
+    """
     def computeMatchingDegree(self,rule,example):
-    """
-        Computes the matching degree of the example to the rule. 
-        
-        * rule is the fuzzy rule (antecedents with Fuzzy/Nominal variables)
-        * example is the tuple with the values to be "fuzzyfied"
-        
-        Product t-norm is used for the whole antecedent. No other t-norm is currently implemented
-    """
+    
         matching = 1.0 
 
         for i in range(len(example)):
